@@ -1,0 +1,9 @@
+.idea/
+.vscode
+*.tar
+*.zip
+*.lzma
+*.bz2
+*.gz
+*.log
+

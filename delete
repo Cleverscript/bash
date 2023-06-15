@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#set -x 
+
+PACKAGE_PATH="$1"
+CURR_PATH="$(pwd)"
+TRASH_PATH="/home/$(whoami)/TRASH/"
+
+# check path file/dir
+if [ -z $PACKAGE_PATH ]; then
+    echo "Warning - path is empty!"
+    exit 1
+fi
+
+# create TRASH folder if is not exist
+if [ ! -d $TRASH_PATH ]; then
+    mkdir $TRASH_PATH
+fi
+
+find $TRASH_PATH -type f -mtime +2 -delete
+
+# If $FILE_PATH current folder - replace to absolute path
+if echo $PACKAGE_PATH | grep -q '^\.\/'; then
+    PACKAGE_PATH="$CURR_PATH/$(echo $PACKAGE_PATH | sed 's/\.\///')"
+elif ! echo $PACKAGE_PATH | grep -q '^\/'; then
+    PACKAGE_PATH="$CURR_PATH/$PACKAGE_PATH"
+fi
+
+
+if [ -f $PACKAGE_PATH ]; then
+    # package & move file
+    lzma $PACKAGE_PATH && mv "$PACKAGE_PATH.lzma" $TRASH_PATH &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "Success delete \"$PACKAGE_PATH\""
+    else
+        echo "Fail delete \"$PACKAGE_PATH\""
+    fi
+elif [ -d $PACKAGE_PATH ]; then
+    # package & move dir
+    tar --ignore-failed-read -zcf "$PACKAGE_PATH.tar.gz" $PACKAGE_PATH && mv "$PACKAGE_PATH.tar.gz" $TRASH_PATH && rm -rf $PACKAGE_PATH &>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "Success delete \"$PACKAGE_PATH\""
+    else
+        echo "Fail delete \"$PACKAGE_PATH\""
+    fi
+else
+    echo "Warning - file or dir path \"$PACKAGE_PATH\" is empty!"
+    exit 1
+fi
+
+
+
+
+

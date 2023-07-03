@@ -17,6 +17,7 @@ if [ ! -d $TRASH_PATH ]; then
     mkdir $TRASH_PATH
 fi
 
+# delete file older than 2 days
 find $TRASH_PATH -type f -mtime +2 -delete
 
 # If $FILE_PATH current folder - replace to absolute path
@@ -26,15 +27,38 @@ elif ! echo $PACKAGE_PATH | grep -q '^\/'; then
     PACKAGE_PATH="$CURR_PATH/$PACKAGE_PATH"
 fi
 
-
-if [ -f $PACKAGE_PATH ]; then
-    # package & move file
-    lzma $PACKAGE_PATH && mv "$PACKAGE_PATH.lzma" $TRASH_PATH &>/dev/null
-    if [ $? -eq 0 ]; then
-        echo "Success delete \"$PACKAGE_PATH\""
+# check symlink
+if [ -L $PACKAGE_PATH ]; then
+    if [ -e $PACKAGE_PATH ]; then
+         echo "Delete sumlink to file $(readlink $PACKAGE_PATH)"
+         unlink $PACKAGE_PATH
     else
-        echo "Fail delete \"$PACKAGE_PATH\""
+        echo "Warning broken link to file $(readlink $PACKAGE_PATH)"
     fi
+elif [ -f $PACKAGE_PATH ]; then
+
+    # check hardlink
+    INODE=$(stat $PACKAGE_PATH | awk '/'Inode'/ {print $4}')
+    if [ ! -z $INODE ]; then
+        COUNT_INODE_FILES=$(find $CURR_PATH -inum $INODE | wc -l)
+        if [ $COUNT_INODE_FILES -gt 1 ]; then
+
+            echo "Sucess delete hardlink ${PACKAGE_PATH}"
+            #echo $COUNT_INODE_FILES
+            rm -f $PACKAGE_PATH
+            echo $(find $CURR_PATH -inum $INODE)
+
+        else
+            # package & move file
+            lzma $PACKAGE_PATH && mv "$PACKAGE_PATH.lzma" $TRASH_PATH &>/dev/null
+            if [ $? -eq 0 ]; then
+                echo "Success delete \"$PACKAGE_PATH\""
+            else
+                echo "Fail delete \"$PACKAGE_PATH\""
+            fi
+        fi
+    fi
+
 elif [ -d $PACKAGE_PATH ]; then
     # package & move dir
     tar --ignore-failed-read -zcf "$PACKAGE_PATH.tar.gz" $PACKAGE_PATH && mv "$PACKAGE_PATH.tar.gz" $TRASH_PATH && rm -rf $PACKAGE_PATH &>/dev/null

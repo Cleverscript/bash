@@ -32,8 +32,10 @@ if [ -L $PACKAGE_PATH ]; then
     if [ -e $PACKAGE_PATH ]; then
          echo "Delete sumlink to file $(readlink $PACKAGE_PATH)"
          unlink $PACKAGE_PATH
+         exit 0
     else
         echo "Warning broken link to file $(readlink $PACKAGE_PATH)"
+        exit 1
     fi
 elif [ -f $PACKAGE_PATH ]; then
 
@@ -47,14 +49,17 @@ elif [ -f $PACKAGE_PATH ]; then
             #echo $COUNT_INODE_FILES
             rm -f $PACKAGE_PATH
             echo $(find $CURR_PATH -inum $INODE)
+            exit 0
 
         else
             # package & move file
             lzma $PACKAGE_PATH && mv "$PACKAGE_PATH.lzma" $TRASH_PATH &>/dev/null
             if [ $? -eq 0 ]; then
                 echo "Success delete \"$PACKAGE_PATH\""
+                exit 0
             else
                 echo "Fail delete \"$PACKAGE_PATH\""
+                exit 1
             fi
         fi
     fi
@@ -64,8 +69,10 @@ elif [ -d $PACKAGE_PATH ]; then
     tar --ignore-failed-read -zcf "$PACKAGE_PATH.tar.gz" $PACKAGE_PATH && mv "$PACKAGE_PATH.tar.gz" $TRASH_PATH && rm -rf $PACKAGE_PATH &>/dev/null
     if [ $? -eq 0 ]; then
         echo "Success delete \"$PACKAGE_PATH\""
+        exit 0
     else
         echo "Fail delete \"$PACKAGE_PATH\""
+        exit 1
     fi
 else
     echo "Warning - file or dir path \"$PACKAGE_PATH\" is empty!"

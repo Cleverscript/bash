@@ -42,7 +42,7 @@ elif [ -f $PACKAGE_PATH ]; then
     # check hardlink
     INODE=$(stat $PACKAGE_PATH | awk '/'Inode'/ {print $4}')
     if [ ! -z $INODE ]; then
-        COUNT_INODE_FILES=$(find $CURR_PATH -inum $INODE | wc -l)
+        COUNT_INODE_FILES=$(find / -inum $INODE 2>/dev/null | wc -l)
         if [ $COUNT_INODE_FILES -gt 1 ]; then
 
             echo "Sucess delete hardlink ${PACKAGE_PATH}"

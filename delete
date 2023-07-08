@@ -44,8 +44,7 @@ elif [ -f $PACKAGE_PATH ]; then
     if [ ! -z $INODE ]; then
         COUNT_INODE_FILES=$(find / -inum $INODE 2>/dev/null | wc -l)
         if [ $COUNT_INODE_FILES -gt 1 ]; then
-
-            echo "Sucess delete hardlink ${PACKAGE_PATH}"
+            echo "Sucess delete hardlink ${PACKAGE_PATH}, remainder files from the same inode:"
             #echo $COUNT_INODE_FILES
             rm -f $PACKAGE_PATH
             echo $(find $CURR_PATH -inum $INODE)

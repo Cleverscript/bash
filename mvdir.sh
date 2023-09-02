@@ -15,11 +15,12 @@ then
 	exit 1
 fi
 
-#check isset dir param 1
+#check isset dir param 2
 if [ ! -d "$2" ]
 then
-	echo "Error! Dir $2 is not exist!"
-	exit 1
+	mkdir "$2"
+	#echo "Error! Dir $2 is not exist!"
+	#exit 1
 fi
 
 #copy & remove dir

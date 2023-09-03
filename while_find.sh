@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Listing all files directory 
+
 DIR="/usr"
 
 find $DIR -type f |
